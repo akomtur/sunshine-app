@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:baselineAligned="false"
+    android:divider="?android:attr/dividerHorizontal"
+    android:orientation="horizontal"
+    android:tag="tablet"
+    tools:context="de.kaubisch.sunshine.app.MainActivity"
+    >
+    <fragment
+        android:id="@+id/fragment_forecast"
+        android:layout_width="0dp"
+        android:layout_weight="43"
+        android:layout_height="match_parent"
+        android:name="de.kaubisch.sunshine.app.ForecastFragment"
+        tools:layout="@android:layout/list_content"
+        android:tag="forecast"/>
+    <FrameLayout
+        android:id="@+id/weather_detail_container"
+        android:layout_width="0dp"
+        android:layout_weight="85"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+</LinearLayout>

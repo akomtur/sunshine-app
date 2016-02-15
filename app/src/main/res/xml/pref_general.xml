@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditTextPreference
+        android:key="@string/pref_location_key"
+        android:title="@string/pref_location_title"
+        android:defaultValue="@string/pref_location_default"
+        android:inputType="text"
+        android:singleLine="true" />
+    <ListPreference
+        android:key="@string/pref_units_key"
+        android:title="Temperature Units"
+        android:dialogTitle="Temperature Units"
+        android:defaultValue="@string/pref_units_metric"
+        android:entries="@array/pref_temperature_units"
+        android:entryValues="@array/pref_temperature_unit_values" />
+
+</PreferenceScreen>
