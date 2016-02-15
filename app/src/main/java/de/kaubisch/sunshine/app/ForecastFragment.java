@@ -9,9 +9,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.WakefulBroadcastReceiver;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import de.kaubisch.sunshine.app.data.WeatherContract;
+import de.kaubisch.sunshine.app.service.SunshineService;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -172,9 +175,11 @@ public class ForecastFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
-    private AsyncTask<String, Void, Void> fetchWeatherData() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
-        return weatherTask.execute(preferences.getString(getString(R.string.pref_location_key), ""));
+    private void fetchWeatherData() {
+        FragmentActivity activity = getActivity();
+        Intent intent = new Intent(activity, SunshineService.class);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        intent.putExtra("location", preferences.getString(getString(R.string.pref_location_key), ""));
+        activity.startService(intent);
     }
 }
