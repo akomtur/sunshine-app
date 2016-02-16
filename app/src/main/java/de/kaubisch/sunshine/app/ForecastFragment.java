@@ -1,5 +1,8 @@
 package de.kaubisch.sunshine.app;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -24,7 +28,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import de.kaubisch.sunshine.app.data.WeatherContract;
+import de.kaubisch.sunshine.app.service.AlarmReceiver;
 import de.kaubisch.sunshine.app.service.SunshineService;
+import de.kaubisch.sunshine.app.sync.SunshineSyncAdapter;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -176,10 +182,13 @@ public class ForecastFragment extends Fragment {
     }
 
     private void fetchWeatherData() {
-        FragmentActivity activity = getActivity();
-        Intent intent = new Intent(activity, SunshineService.class);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-        intent.putExtra("location", preferences.getString(getString(R.string.pref_location_key), ""));
-        activity.startService(intent);
+        SunshineSyncAdapter.syncImmediately(getActivity());
+//        FragmentActivity activity = getActivity();
+//        AlarmManager alarmManager = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
+//        Intent intent = new Intent(activity, AlarmReceiver.class);
+//        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+//        intent.putExtra("location", preferences.getString(getString(R.string.pref_location_key), ""));
+//        PendingIntent broadcast = PendingIntent.getBroadcast(activity, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+//        alarmManager.set(AlarmManager.  RTC_WAKEUP, SystemClock.elapsedRealtime() + 5, broadcast);
     }
 }

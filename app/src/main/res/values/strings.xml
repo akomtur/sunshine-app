@@ -97,4 +97,9 @@
         <item>metric</item>
         <item>imperial</item>
     </string-array>
+
+    <!-- Account type (for sync-adapter authenticator) -->
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">sunshine.example.com</string>
+    <string name="content_authority">de.kaubisch.android.sunshine.app</string>
 </resources>
