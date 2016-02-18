@@ -1,23 +1,18 @@
 package de.kaubisch.sunshine.app;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.content.WakefulBroadcastReceiver;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,10 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import de.kaubisch.sunshine.app.data.WeatherContract;
-import de.kaubisch.sunshine.app.service.AlarmReceiver;
-import de.kaubisch.sunshine.app.service.SunshineService;
 import de.kaubisch.sunshine.app.sync.SunshineSyncAdapter;
 
 /**
@@ -75,7 +69,10 @@ public class ForecastFragment extends Fragment {
     private LoaderManager.LoaderCallbacks<Cursor> callback;
 
     private ListView listView;
+    private TextView emptyView;
     private int position;
+
+    private SharedPreferences.OnSharedPreferenceChangeListener preferenceListener;
     public ForecastFragment() {
     }
 
@@ -83,8 +80,27 @@ public class ForecastFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        preferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if(SunshineSyncAdapter.SETTINGS_LOCATION_STATUS.equals(key)) {
+                    updateEmptyText();
+                }
+            }
+        };
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(preferenceListener);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).unregisterOnSharedPreferenceChangeListener(preferenceListener);
+    }
 
     public void onLocationChanged() {
         fetchWeatherData();
@@ -103,6 +119,8 @@ public class ForecastFragment extends Fragment {
 
         listView = (ListView) view.findViewById(R.id.listview_forecast);
         listView.setAdapter(forecastAdapter);
+        emptyView = (TextView) view.findViewById(R.id.listview_forecast_empty);
+        listView.setEmptyView(emptyView);
 
         if(savedInstanceState != null) {
             position = savedInstanceState.getInt(LIST_POSITION, 0);
@@ -148,7 +166,13 @@ public class ForecastFragment extends Fragment {
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 forecastAdapter.swapCursor(data);
-                listView.smoothScrollToPosition(position);
+                if(position != ListView.INVALID_POSITION) {
+                    listView.smoothScrollToPosition(position);
+                }
+
+                if(data.getCount() == 0) {
+                    updateEmptyText();
+                }
             }
 
             @Override
@@ -157,6 +181,25 @@ public class ForecastFragment extends Fragment {
             }
         };
         cursorLoader = getLoaderManager().initLoader(FORECAST_LOADER_ID, null, callback);
+    }
+
+    private void updateEmptyText() {
+        int emptyText = R.string.forecast_empty_list;
+        Context context = getActivity();
+        if(isNetworkInactive()) {
+            emptyText = R.string.empty_forecast_not_connected;
+        } else if (SunshineSyncAdapter.getLocationStatus(context) == SunshineSyncAdapter.LOCATION_STATUS_SERVER_DOWN) {
+            emptyText = R.string.empty_forecast_list_server_down;
+        } else if (SunshineSyncAdapter.getLocationStatus(context) == SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID) {
+            emptyText = R.string.empty_forecast_list_server_error;
+        }
+        emptyView.setText(getString(emptyText));
+    }
+
+    private boolean isNetworkInactive() {
+        ConnectivityManager connectService = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectService.getActiveNetworkInfo();
+        return info == null || !info.isConnectedOrConnecting();
     }
 
     @Override

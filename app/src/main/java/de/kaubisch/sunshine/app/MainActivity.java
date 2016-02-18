@@ -2,9 +2,11 @@ package de.kaubisch.sunshine.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -13,12 +15,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+
 import java.util.Objects;
 
 import de.kaubisch.sunshine.app.data.WeatherContract;
+import de.kaubisch.sunshine.app.gcm.RegistrationIntentService;
+import de.kaubisch.sunshine.app.sync.SunshineSyncAdapter;
 
 public class MainActivity extends ActionBarActivity {
 
+    public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
     private String location;
 
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
@@ -73,6 +81,16 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
         }
+
+        SunshineSyncAdapter.initializeSyncAdapter(this);
+        if(checkPlayServices()) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean sentToken = preferences.getBoolean(SENT_TOKEN_TO_SERVER, false);
+            if(!sentToken) {
+                Intent intent = new Intent(this, RegistrationIntentService.class);
+                startService(intent);
+            }
+        }
     }
 
     private ForecastFragment getForecastFragment() {
@@ -113,6 +131,21 @@ public class MainActivity extends ActionBarActivity {
             }
             location = savedLocation;
         }
+    }
+
+    private boolean checkPlayServices() {
+        GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
+        int resultCode = availability.isGooglePlayServicesAvailable(this);
+        if(resultCode != ConnectionResult.SUCCESS) {
+            if(availability.isUserResolvableError(resultCode)) {
+                availability.getErrorDialog(this, resultCode, 9000).show();
+            } else {
+                finish();
+            }
+            return false;
+        }
+
+        return true;
     }
 
     @Override

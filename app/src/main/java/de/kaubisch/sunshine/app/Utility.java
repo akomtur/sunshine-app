@@ -218,7 +218,7 @@ public class Utility {
         return -1;
     }
 
-    static String formatTemperature(double temperature, Context context, boolean isMetric) {
+    public static String formatTemperature(double temperature, Context context, boolean isMetric) {
         double temp;
         if ( !isMetric ) {
             temp = 9*temperature/5+32;

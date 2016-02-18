@@ -102,4 +102,17 @@
     <!-- SyncAdapter related -->
     <string name="sync_account_type">sunshine.example.com</string>
     <string name="content_authority">de.kaubisch.android.sunshine.app</string>
+
+    <!-- Notification Format -->
+    <string name="format_notification">
+    Forecast: <xliff:g id="condition">%1$s</xliff:g> High: <xliff:g id="high">%2$s</xliff:g> Low: <xliff:g id="low">%3$s</xliff:g>
+    </string>
+    <!-- Strings related to Notification preference -->
+    <string name="pref_last_notification">last_notification</string>
+    <string name="forecast_empty_list">No weather information available.</string>
+    <string name="empty_forecast_not_connected">No weather information available.\nThe network is not available to fetch weather data.</string>
+    <string name="empty_forecast_list_server_down">No weather information available.\nThe server is not returning data.</string>
+    <string name="empty_forecast_list_server_error">No weather information available.\nThe server is not returning valid data. Please check for an updated version of Sunshine.</string>
+
+    <string name="gcm_weather_alert">Heads up: %1$s in %2$s!</string>
 </resources>
